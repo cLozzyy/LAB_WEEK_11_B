@@ -1,0 +1,47 @@
+Answer these questions based on Part 3 of the tutorial:
+1. When a user takes a picture, that picture is stored in a path based on the given
+URI. In which part of the code handles this? (Copy that part of the code as the
+answer)
+
+// Activity result launcher untuk mengambil gambar
+private lateinit var takePictureLauncher: ActivityResultLauncher<Uri>
+
+onCreate()
+takePictureLauncher =
+    registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        // Memasukkan gambar ke MediaStore jika pengambilan berhasil (success == true)
+        if (success) {
+            providerFileManager.insertImageToStore(photoInfo)
+        }
+    }
+
+
+private fun openImageCapture() {
+
+    photoInfo =
+        providerFileManager.generatePhotoUri(System.currentTimeMillis())
+
+
+    photoInfo?.uri?.let {
+        takePictureLauncher.launch(it)
+    }
+}
+
+takePictureLauncher.launch(it), di mana it adalah Uri yang dihasilkan oleh ProviderFileManager.
+Sistem Android kemudian menangani penyimpanan gambar ke Uri tersebut.
+
+
+
+2. In your FileInfo.kt, there are 5 attributes. On the first attribute, what does the URI
+refer to? And on the fourth attribute, what does relativePath refer to?
+
+FileProvider menghasilkan URI ini untuk memberikan akses aman dan sementara ke file yang disimpan di direktori internal aplikasi Anda.
+Aplikasi kamera (atau aplikasi lain) menggunakan URI ini untuk mendapatkan izin menulis file gambar ke lokasi tersebut.
+Ini adalah mekanisme keamanan modern di Android untuk menghindari pemberian akses langsung ke sistem file.
+
+
+3. [Bonus] Explain the chronological order from when a user takes a picture until
+the file is stored in the MediaStore.
+
+Saat pengguna menekan tombol foto, aplikasi pertama-tama membuat sebuah URI sementara yang aman. URI ini kemudian diteruskan saat meluncurkan aplikasi kamera, yang menggunakannya sebagai lokasi tujuan untuk menyimpan gambar yang baru diambil. Setelah pengguna selesai, aplikasi akan menerima konfirmasi.
+Jika berhasil, aplikasi akan menyalin file gambar dari lokasi sementara tersebut ke penyimpanan publik (MediaStore) menggunakan ContentResolver. Proses ini memastikan gambar tersebut muncul di galeri perangkat dan dapat diakses oleh aplikasi lain, menyelesaikan siklus penyimpanan secara permanen.
